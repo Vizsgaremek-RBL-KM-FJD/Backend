@@ -1,4 +1,5 @@
 const db = require('./db');
+const bcrypt = require('bcrypt');
 
 async function  getDatas() {
     const rows = await db.query('SELECT * FROM users');
@@ -9,8 +10,11 @@ async function  getDatas() {
 async function create(user) {
     console.log("User?",user);
 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+
     const result = await db.query(`
-        Insert into users (first_name, last_name, gender, email, address, phone_number)
+        Insert into users (first_name, last_name, gender, email, address, phone_number, password)
         values (?,?,?,?,?,?)`,
         
         [user.first_name,
@@ -18,7 +22,8 @@ async function create(user) {
         user.gender,
         user.email,
         user.address,
-        user.phone_number
+        user.phone_number,
+        hashedPassword
         ])
 
         let message = "User can not be created";
